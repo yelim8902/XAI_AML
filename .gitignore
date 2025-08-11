@@ -1,0 +1,9 @@
+data/raw/
+data/raw/
+results/figures/
+notebooks/.ipynb_checkpoints/
+*.ipynb_checkpoints
+.DS_Store
+data/raw/
+notebooks/.ipynb_checkpoints/
+.DS_Store

@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>의심거래 분석(STR) 보고서</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+        }
+        h4 {
+            color: #34495e;
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .transaction-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .feature-list {
+            background: #e8f4fd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #d1ecf1;
+        }
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        .shap-value {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .raw-value {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .contribution-positive {
+            color: #27ae60;
+        }
+        .contribution-negative {
+            color: #e74c3c;
+        }
+        .status-correct {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .status-incorrect {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .performance-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .performance-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .performance-item:last-child {
+            border-bottom: none;
+        }
+        .shap-importance {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .llm-explanation {
+            background: #f1f8e9;
+            border: 1px solid #c5e1a5;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+        .emoji {
+            font-size: 1.2em;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+<h1>📄 의심거래 분석(STR) 자동 생성 보고서</h1>
+<h2>1. 📊 모델 성능 요약</h2>
+<ul>
+<li>
+<p><strong>사용 모델</strong>: Random Forest (n_estimators=200)</p>
+</li>
+<li>
+<p><strong>정밀도(Precision)</strong>: 0.867</p>
+</li>
+<li><strong>재현율(Recall)</strong>: 0.951</li>
+<li><strong>F1-score</strong>: 0.907</li>
+<li><strong>사기 거래 샘플 수</strong>: 4254.0</li>
+<li><strong>False Positives</strong>: 622</li>
+<li><strong>False Negatives</strong>: 207</li>
+<li><strong>모델 임계값</strong>: 0.869</li>
+</ul>
+<h2>2. 🔍 SHAP 상위 피처 중요도</h2>
+<ul>
+<li>type_CASH_IN: 174645.327916</li>
+<li>amount_to_balance_ratio: 90060.252924</li>
+<li>oldbalanceOrg: 40124.634512</li>
+<li>hour: 13999.735357</li>
+<li>amount: 12021.325500</li>
+</ul>
+<p><img alt="SHAP Feature Importance" src="../figures/individual_shap_transaction_9770.png" /></p>
+<h2>3. 🔍 개별 거래 SHAP 설명</h2>
+<h3>주요 거래별 모델 판단 근거</h3>
+<h4>거래 #9770 ✅</h4>
+<ul>
+<li><strong>예측</strong>: 사기</li>
+<li><strong>실제</strong>: 사기</li>
+<li><strong>판단 정확도</strong>: 정확</li>
+<li><strong>주요 판단 근거</strong>:</li>
+<li><strong>type_CASH_IN</strong>: -0.3509 (SHAP: +39460.6643) 📈</li>
+<li><strong>amount_to_balance_ratio</strong>: -0.1535 (SHAP: +30623.7634) 📈</li>
+<li><strong>oldbalanceOrg</strong>: -0.3852 (SHAP: +21934.0272) 📈</li>
+</ul>
+<p><strong>🤖 AI 해석</strong>: 거래 ID #9770이 사기로 분류된 주요 이유는 SHAP 분석 결과에서 나타난 세 가지 피처의 긍정적인 기여 때문입니다. 특히, type_CASH_IN, amount_to_balance_ratio, oldbalanceOrg의 SHAP 값이 각각 +39460.6643, +30623.7634, +21934.0272로 나타나, 이 거래가 비정상적인 현금 유입과 비율을 보이며, 기존 잔액과의 불일치가 사기 가능성을 높였음을 시사합니다. 이러한 요소들이 결합되어 모델은 이 거래를 사기로 판단했습니다.</p>
+<p><img alt="거래 #9770 SHAP 설명" src="../figures/individual_shap_transaction_9770.png" /></p>
+<h4>거래 #9771 ✅</h4>
+<ul>
+<li><strong>예측</strong>: 사기</li>
+<li><strong>실제</strong>: 사기</li>
+<li><strong>판단 정확도</strong>: 정확</li>
+<li><strong>주요 판단 근거</strong>:</li>
+<li><strong>type_CASH_IN</strong>: -0.3509 (SHAP: +39464.2281) 📈</li>
+<li><strong>amount_to_balance_ratio</strong>: -0.1535 (SHAP: +30702.3924) 📈</li>
+<li><strong>oldbalanceOrg</strong>: -0.3852 (SHAP: +18159.8387) 📈</li>
+</ul>
+<p><strong>🤖 AI 해석</strong>: 거래 ID #9771이 사기로 분류된 주된 이유는 SHAP 분석 결과에서 나타난 세 가지 주요 피처의 긍정적인 기여 때문입니다. 'type_CASH_IN', 'amount_to_balance_ratio', 'oldbalanceOrg'의 SHAP 값이 각각 높은 증가 효과를 보이며, 이는 거래가 비정상적이고 의심스러운 패턴을 나타내고 있음을 시사합니다. 특히, 이러한 피처들은 일반적인 거래와 비교했을 때 비정상적으로 높은 수치를 기록하여 모델이 이 거래를 사기로 판단하는 데 결정적인 역할을 했습니다.</p>
+<p><img alt="거래 #9771 SHAP 설명" src="../figures/individual_shap_transaction_9771.png" /></p>
+<h4>거래 #22133 ✅</h4>
+<ul>
+<li><strong>예측</strong>: 사기</li>
+<li><strong>실제</strong>: 사기</li>
+<li><strong>판단 정확도</strong>: 정확</li>
+<li><strong>주요 판단 근거</strong>:</li>
+<li><strong>type_CASH_IN</strong>: -0.3509 (SHAP: +68412.7776) 📈</li>
+<li><strong>type_PAYMENT</strong>: -0.4503 (SHAP: +53483.5955) 📈</li>
+<li><strong>oldbalanceOrg</strong>: -0.0889 (SHAP: -46158.3571) 📉</li>
+</ul>
+<p><strong>🤖 AI 해석</strong>: 이 거래는 두 가지 주요 피처(type_CASH_IN 및 type_PAYMENT)의 SHAP 값이 매우 높아 사기로 분류되었습니다. 특히, type_CASH_IN과 type_PAYMENT는 각각 +68412.7776과 +53483.5955의 증가 효과를 나타내어 사기 가능성을 높였으며, 반면 oldbalanceOrg는 -46158.3571의 감소 효과를 보여 거래의 신뢰성을 낮추는 역할을 했습니다. 이러한 피처들의 조합으로 인해 모델은 이 거래를 사기로 판단했습니다.</p>
+<p><img alt="거래 #22133 SHAP 설명" src="../figures/individual_shap_transaction_22133.png" /></p>
+<h2>4. 🤖 SHAP 결과 해석 (LLM 자동 생성)</h2>
+<h1>금융 사기 탐지 모델의 SHAP 분석 결과 및 피처 중요도 보고서</h1>
+<h2>1. 서론</h2>
+<p>본 보고서는 금융 사기 탐지(Fraud Detection System, FDS) 모델의 SHAP (SHapley Additive exPlanations) 분석을 통해 도출된 주요 피처와 그 중요성을 설명합니다. 각 피처의 중요도는 사기 거래를 탐지하는 데 있어 어떤 역할을 하는지, 그리고 특정 거래 패턴에서 값이 높거나 낮을 때 위험도가 어떻게 변화하는지를 다룹니다.</p>
+<h2>2. 주요 피처 및 중요도</h2>
+<h3>2.1 type_CASH_IN (중요도: 174,600)</h3>
+<p><strong>설명:</strong> 
+'CASH_IN' 거래 유형은 고객이 계좌에 자금을 입금하는 행위를 나타냅니다. 이 피처는 사기 거래에서 특히 중요하게 작용합니다. 사기범들은 종종 대규모 자금을 빠르게 입금한 후, 이를 즉시 인출하는 방식으로 사기를 저지르기 때문입니다.</p>
+<p><strong>위험도 증가 패턴:</strong>
+- 대규모 현금 입금 후 즉시 인출 시 사기 위험이 증가합니다.
+- 비정상적으로 잦은 CASH_IN 거래가 발생할 경우, 사기 가능성이 높아질 수 있습니다.</p>
+<h3>2.2 amount_to_balance_ratio (중요도: 90,060)</h3>
+<p><strong>설명:</strong> 
+이 피처는 거래 금액과 계좌 잔액 간의 비율을 나타냅니다. 높은 비율은 고객이 잔액에 비해 비정상적으로 큰 금액을 거래하고 있음을 의미합니다.</p>
+<p><strong>위험도 증가 패턴:</strong>
+- 잔액에 비해 비정상적으로 큰 거래가 발생할 경우, 사기 가능성이 높아집니다.
+- 일반적으로 고객의 거래 패턴과 비교했을 때, 이 비율이 급격히 증가하면 사기 거래로 간주할 수 있습니다.</p>
+<h3>2.3 oldbalanceOrg (중요도: 40,120)</h3>
+<p><strong>설명:</strong> 
+'oldbalanceOrg'는 거래 이전의 계좌 잔액을 나타냅니다. 사기 거래는 종종 계좌 잔액이 낮은 상태에서 발생하며, 이는 사기범들이 자금을 빨리 소진하려는 경향</p>
+<hr />
+<p>보고서 생성 완료 ✅</p>
+    </div>
+    <div class="footer">
+        <p>보고서 생성 완료 ✅ | XAI 시스템</p>
+    </div>
+</body>
+</html>

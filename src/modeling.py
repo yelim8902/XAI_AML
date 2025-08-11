@@ -157,3 +157,31 @@ def load_artifacts(
     model = load(model_path)
     scaler = load(scaler_path) if scaler_path is not None and Path(scaler_path).exists() else None
     return model, scaler
+
+
+def get_model_info(model):
+    """
+    모델의 기본 정보를 반환합니다.
+    """
+    model_type = type(model).__name__
+    
+    # 모델별 상세 정보
+    if hasattr(model, 'n_estimators'):
+        # Random Forest
+        info = f"Random Forest (n_estimators={model.n_estimators})"
+    elif hasattr(model, 'n_neighbors'):
+        # KNN
+        info = f"K-Nearest Neighbors (n_neighbors={model.n_neighbors})"
+    elif hasattr(model, 'C'):
+        # SVM
+        info = f"Support Vector Machine (C={model.C})"
+    elif hasattr(model, 'alpha'):
+        # Ridge/Lasso
+        info = f"{model_type} (alpha={model.alpha})"
+    elif hasattr(model, 'max_depth'):
+        # Decision Tree
+        info = f"Decision Tree (max_depth={model.max_depth})"
+    else:
+        info = model_type
+    
+    return info

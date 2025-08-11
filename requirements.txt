@@ -6,3 +6,4 @@ shap
 matplotlib
 seaborn
 joblib
+openai

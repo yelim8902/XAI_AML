@@ -1,100 +1,131 @@
-# 📄 Explainable AI 기반 이상거래 탐지 & STR 보고서 자동화 시스템
+# XAI_FDS_Project
 
-## 1. 프로젝트 개요
-
-이 프로젝트는 **금융 이상거래 탐지(Fraud Detection)** 모델에 **설명 가능한 인공지능(Explainable AI, XAI)** 기법을 적용하고, 이를 바탕으로 **GPT 기반 STR(의심거래보고) 보고서**를 자동 생성하는 시스템입니다.
-
-- **목표**: 높은 탐지 성능과 함께, “왜” 특정 거래가 이상하다고 판단되었는지에 대한 **투명하고 직관적인 설명** 제공
-- **활용 기술**:
-  - 머신러닝 기반 이상거래 탐지(RandomForest, GradientBoosting, XGBoost, LightGBM 등)
-  - XAI 기법 (SHAP, LIME, Counterfactual Explanation)
-  - GPT 기반 보고서 자동화
+금융 사기 탐지(FDS) 모델 개발 및 XAI 기반 의심거래 보고서 자동화 시스템
 
 ---
 
-## 2. 프로젝트 구조
+## 📌 프로젝트 개요
 
-- XAI_AML
-  - data
-    - processed
-    - raw *(gitignored)*
-  - notebooks
-    - data_preprocessing.ipynb
-    - model_training.ipynb
-    - xai_analysis.ipynb
-  - src
-    - save_model.py
-    - enhanced_fraud_detection.py
-    - xai_analysis.py
-    - report_generator.py
-    - utils.py
-  - results
-    - figures
-    - metrics
-  - models
-  - requirements.txt
-  - README.md
-  - LICENSE
-
+본 프로젝트는 금융 거래 데이터를 기반으로 **이상거래 탐지(Fraud Detection)** 모델을 학습하고,  
+SHAP 기반 XAI 분석 결과를 포함한 **의심거래 보고서(STR)** 를 자동 생성하는 것을 목표로 한다.
 
 ---
 
-## 3. 데이터셋
+## 📂 폴더 구조
 
-본 프로젝트에서는 공개된 금융 이상거래 시뮬레이션 데이터셋을 사용합니다.
+```
 
-### (1) PaySim Dataset
+XAI\_FDS\_Project/
+├── data/
+│   ├── 01\_raw/              # 원본 데이터 (변경 금지)
+│   │   └── paysim.csv
+│   └── 02\_processed/        # 전처리된 데이터
+│       └── preprocessed\_data.csv
+│
+├── notebooks/               # 실험 및 분석용 노트북
+│   ├── 01\_eda.ipynb
+│   └── 02\_model\_prototyping.ipynb
+│
+├── outputs/                 # 모든 실행 결과물 통합 저장
+│   ├── figures/             # 시각화 자료 (SHAP 플롯 등)
+│   ├── metrics/             # 성능 지표 (JSON, PNG 등)
+│   ├── models/              # 학습된 모델 (joblib 등)
+│   └── reports/             # 최종 보고서 (STR\_Report.md 등)
+│
+├── scripts/                 # 실행 스크립트
+│   ├── train.py             # 모델 학습 및 저장
+│   ├── evaluate.py          # 모델 성능 평가
+│   └── generate\_report.py   # STR 보고서 자동 생성
+│
+├── src/                     # 재사용 가능한 모듈
+│   ├── preprocessing.py
+│   ├── modeling.py
+│   ├── evaluation.py
+│   ├── xai.py
+│   └── reporting.py
+│
+└── README.md
 
-- **출처**: Mobile Money Transactions 시뮬레이션 데이터
-- **특징**:
-  - 거래 ID, 금액, 거래유형, 송·수신 계좌, 잔액 변화 등 포함
-  - 사기 거래 여부(`isFraud`) 및 시도된 사기 거래(`isFlaggedFraud`) 라벨 포함
-- **전처리**:
-  - 결측치 제거 및 이상값 처리
-  - 범주형 변수 원-핫 인코딩
-  - 파생 변수 생성 (잔액 변화율, 거래 빈도, 거래 시간 간격 등)
-  - SMOTE를 통한 클래스 불균형 해결
+```
 
 ---
 
-## 4. 주요 기능
+## ⚙️ 실행 방법
 
-1. **이상거래 탐지 모델 학습**
-   - 앙상블 및 부스팅 기반 모델 적용
-   - GridSearchCV로 하이퍼파라미터 튜닝
-2. **XAI 분석**
-   - SHAP: 전역·로컬 피처 중요도 분석
-   - LIME: 개별 거래 예측 근거 설명
-   - Counterfactual: “만약 ~였다면” 시나리오 분석
-3. **STR 보고서 자동화**
-   - XAI 분석 결과를 기반으로 GPT가 자동 문장 생성
-   - 보고서 템플릿 기반 PDF 또는 DOCX 출력
-
----
-
-## 5. 설치 & 실행 방법
+### 1. 모델 학습
 
 ```bash
-# 1. 저장소 클론
-git clone https://github.com/username/XAI-Fraud-Detection.git
-cd XAI-Fraud-Detection
+cd XAI_FDS_Project
+python scripts/train.py --imbalance smote --n_estimators 200 --seed 42
+```
 
-# 2. 가상환경 생성 및 활성화
-conda create -n xai_fds python=3.9
-conda activate xai_fds
+**옵션 설명**
 
-# 3. 필수 패키지 설치
+- `--imbalance smote` : 불균형 데이터 보정 방법 (smote / none)
+- `--n_estimators 200` : 모델 트리 개수 설정
+- `--seed 42` : 랜덤 시드 고정
+
+---
+
+### 2. 모델 평가
+
+```bash
+python scripts/evaluate.py
+```
+
+- Confusion Matrix, Classification Report, AUPRC 등 주요 지표 저장
+
+---
+
+### 3. STR 보고서 생성
+
+```bash
+python scripts/generate_report.py --analysis_period "2025-08-01 ~ 2025-08-11"
+```
+
+- 분석 기간 동안의 의심거래 사례 + SHAP Top Features 포함 보고서 생성
+
+---
+
+## 📊 결과물 예시
+
+| 결과물     | 설명                         | 예시 경로                                       |
+| ---------- | ---------------------------- | ----------------------------------------------- |
+| 모델 파일  | 학습된 모델 객체             | `outputs/models/model.joblib`                   |
+| 성능 지표  | JSON, Confusion Matrix PNG   | `outputs/metrics/classification_report.json`    |
+| XAI 시각화 | SHAP Bar Plot, Beeswarm Plot | `outputs/figures/final_bar.png`                 |
+| 보고서     | STR 보고서 (Markdown)        | `outputs/reports/STR_Report_YYYYMMDD_HHMMSS.md` |
+
+---
+
+### 📈 SHAP 분석 예시
+
+![SHAP Bar Plot](outputs/figures/final_bar.png)
+
+### 📄 STR 보고서 예시
+
+![STR 보고서 예시](outputs/reports/sample_report.png)
+
+---
+
+## 🛠 환경 설정
+
+```bash
+conda create -n xai_env python=3.10
+conda activate xai_env
 pip install -r requirements.txt
+```
 
-# 4. 데이터 전처리 실행
-python src/data_preprocessing.py
+---
 
-# 5. 모델 학습
-python src/enhanced_fraud_detection.py
+## 📌 주요 특징
 
-# 6. XAI 분석
-python src/xai_analysis.py
+- LightGBM 기반 이진 분류 모델
+- SMOTE를 활용한 데이터 불균형 보정
+- SHAP 기반 XAI 설명 기능
+- STR 보고서 자동 생성 및 저장
+- 폴더 구조 기반 재현 가능성 보장
 
-# 7. STR 보고서 생성
-python src/report_generator.py
+```
+
 ```

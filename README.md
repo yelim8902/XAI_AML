@@ -14,34 +14,28 @@
 
 ## 2. 프로젝트 구조
 
-📂 XAI-Fraud-Detection
-│
-├── data/ # 데이터셋
-│ ├── raw/ # 원본 데이터 (예: PaySim, IEEE-CIS Fraud Detection)
-│ ├── processed/ # 전처리된 데이터
-│ └── shap_values/ # SHAP 값 저장 폴더
-│
-├── models/
-│ ├── naive_bayes_model.pkl # 기존 모델
-│ ├── enhanced_best_model.pkl # 최적 성능 모델
-│ └── scaler.pkl # 표준화 객체
-│
-├── notebooks/
-│ ├── data_preprocessing.ipynb # 데이터 전처리 & 파생변수 생성
-│ ├── model_training.ipynb # 모델 학습 & 평가
-│ ├── xai_analysis.ipynb # SHAP, LIME 분석
-│ └── gpt_report_generation.ipynb # STR 보고서 생성
-│
-├── src/
-│ ├── save_model.py # 기존 모델 학습 스크립트
-│ ├── enhanced_fraud_detection.py # 개선 모델 학습 스크립트
-│ ├── xai_analysis.py # XAI 해석 로직
-│ ├── report_generator.py # GPT 보고서 생성
-│ └── utils.py # 공통 함수
-│
-├── requirements.txt # 필요한 패키지
-├── README.md # 프로젝트 설명서 (본 파일)
-└── LICENSE
+- XAI_AML
+  - data
+    - processed
+    - raw *(gitignored)*
+  - notebooks
+    - data_preprocessing.ipynb
+    - model_training.ipynb
+    - xai_analysis.ipynb
+  - src
+    - save_model.py
+    - enhanced_fraud_detection.py
+    - xai_analysis.py
+    - report_generator.py
+    - utils.py
+  - results
+    - figures
+    - metrics
+  - models
+  - requirements.txt
+  - README.md
+  - LICENSE
+
 
 ---
 

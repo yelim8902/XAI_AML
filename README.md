@@ -55,14 +55,6 @@
   - 파생 변수 생성 (잔액 변화율, 거래 빈도, 거래 시간 간격 등)
   - SMOTE를 통한 클래스 불균형 해결
 
-### (2) IEEE-CIS Fraud Detection Dataset _(선택적)_
-
-- **출처**: IEEE Computational Intelligence Society
-- **특징**:
-  - 대규모 e-커머스 결제 데이터
-  - 수백 개의 익명화된 피처 포함
-  - 복잡한 결제 패턴 기반 사기 탐지 가능
-
 ---
 
 ## 4. 주요 기능

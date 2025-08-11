@@ -1,202 +1,114 @@
-# XAI (Explainable AI) 금융 사기 탐지 프로젝트
+# 📄 Explainable AI 기반 이상거래 탐지 & STR 보고서 자동화 시스템
 
-## 프로젝트 개요
+## 1. 프로젝트 개요
 
-이 프로젝트는 금융 거래 데이터를 분석하여 사기 거래를 탐지하는 머신러닝 모델을 구축하고, **XAI(Explainable AI)**를 통해 모델의 의사결정 과정을 투명하게 설명하는 것을 목표로 합니다.
+이 프로젝트는 **금융 이상거래 탐지(Fraud Detection)** 모델에 **설명 가능한 인공지능(Explainable AI, XAI)** 기법을 적용하고, 이를 바탕으로 **GPT 기반 STR(의심거래보고) 보고서**를 자동 생성하는 시스템입니다.
 
-## 🎯 핵심 목표
-
-- **사기 탐지의 완벽성**: 사기를 전혀 놓치지 않는 모델 구축
-- **모델 투명성**: 왜 그런 판단을 했는지 명확하게 설명
-- **비즈니스 적용**: 실제 금융 환경에서 활용 가능한 솔루션 제공
-
-## 🏗️ 프로젝트 구조
-
-```
-XAI/
-├── app/                    # 웹 애플리케이션
-│   └── models/           # 모델 관련 파일
-├── data/                  # 데이터 파일
-│   ├── raw/              # 원본 데이터
-│   └── processed/        # 전처리된 데이터
-├── notebooks/             # Jupyter 노트북
-│   ├── eda_model_train.ipynb      # EDA 및 모델 학습
-│   └── 05_xai_model_explanation.py # XAI 분석
-├── src/                   # 소스 코드
-├── tests/                 # 테스트 코드
-├── results/               # 결과 파일
-└── ui/                    # 사용자 인터페이스
-```
-
-## 📊 데이터셋
-
-**PaySim 금융 거래 시뮬레이션 데이터**
-
-- **크기**: 6,362,620건의 거래
-- **기간**: 30일(744시간) 시뮬레이션
-- **특징**: 실제 금융 거래 패턴을 시뮬레이션한 합성 데이터
-- **사기 비율**: 전체 거래의 0.2% (매우 불균형)
-
-### 주요 특성
-
-- `amount`: 거래 금액
-- `type`: 거래 유형 (CASH-IN, CASH-OUT, DEBIT, PAYMENT, TRANSFER)
-- `isFraud`: 사기 여부 (타겟 변수)
-- `oldbalanceOrg/newbalanceOrig`: 송금자 잔액 변화
-- `oldbalanceDest/newbalanceDest`: 수취인 잔액 변화
-
-## 🤖 선택된 모델: Gaussian Naive Bayes
-
-### 왜 이 모델을 선택했는가?
-
-#### 1. **비즈니스 우선순위 충족**
-
-- **재현율 100%**: 사기를 전혀 놓치지 않음 ⭐
-- **안전 우선**: 보수적 접근으로 위험 최소화
-
-#### 2. **실용적 장점**
-
-- **빠른 처리**: 실시간 거래 모니터링에 적합
-- **해석 용이**: 모델 의사결정 과정 이해 가능
-- **안정성**: 과적합 위험 낮음
-
-#### 3. **XAI 요구사항 충족**
-
-- **투명성**: SHAP를 통한 명확한 설명
-- **특성 기여도**: 각 요소가 판단에 미치는 영향 분석
-
-### 모델 성능
-
-| 지표         | 값       | 설명                               |
-| ------------ | -------- | ---------------------------------- |
-| **정확도**   | 73.42%   | 전체 예측 중 정확한 비율           |
-| **재현율**   | **100%** | **사기를 놓치지 않음** ⭐          |
-| **정밀도**   | 65%      | 사기로 예측한 것 중 실제 사기 비율 |
-| **F1-Score** | 79%      | 정밀도와 재현율의 조화평균         |
-
-## 🔍 XAI (Explainable AI) 분석
-
-### SHAP 기반 특성 중요도
-
-가장 중요한 특성들:
-
-1. **거래 금액 (amount)**: 가장 중요한 지표
-2. **잔액 차이 (orig_diff, dest_diff)**: 불일치 탐지
-3. **고액 거래 플래그 (surge)**: 이상치 탐지
-4. **거래 유형 (type\_\*)**: 도메인 지식 반영
-5. **수신 빈도 (freq_dest)**: 패턴 분석
-
-### 개별 거래 분석
-
-- **사기 거래**: 어떤 특성이 사기 판단에 기여했는지 명확히 파악
-- **정상 거래**: 왜 정상으로 분류되었는지 설명 가능
-- **SHAP Force Plot**: 특성별 기여도를 시각적으로 표현
-
-## 📈 특성 엔지니어링
-
-### 생성된 새로운 특성
-
-1. **잔액 차이 플래그 (orig_diff, dest_diff)**
-
-   - 정상 거래: 송금자 잔액 감소 = 거래 금액
-   - 불일치 시: 사기 가능성 증가
-
-2. **고액 거래 플래그 (surge)**
-
-   - 임계값: 450,000원 (75% 백분위수)
-   - 고액 거래는 사기 위험 증가
-
-3. **수신 빈도 플래그 (freq_dest)**
-
-   - 임계값: 20회 이상 수신
-   - 다수 송금자로부터 반복 수신 시 의심
-
-4. **상점 계정 플래그 (merchant)**
-   - ID가 'M'으로 시작하는 계정 식별
-   - 상점 계정은 일반 고객과 다른 패턴
-
-## ⚠️ 모델의 한계점
-
-### 현재 한계
-
-1. **정밀도 65%**: 정상 거래를 사기로 오탐
-2. **특성 독립성 가정**: 실제로는 상관관계 존재
-3. **클래스 불균형**: 사기 데이터가 매우 적음
-
-### 개선 방향
-
-1. **앙상블 모델**: Random Forest + Naive Bayes 조합
-2. **특성 엔지니어링**: 더 많은 도메인 지식 반영
-3. **비용 민감 학습**: 사기 놓침 비용을 더 높게 설정
-
-## 🚀 실용적 활용 방안
-
-### 1. 고객 서비스
-
-- 거래 거부 시 명확한 이유 제공
-- 고객 문의에 대한 구체적 설명 가능
-
-### 2. 규제 준수
-
-- 금융 규제 기관에 모델 의사결정 과정 투명하게 제시
-- 감사 및 검증 요구사항 충족
-
-### 3. 모델 개선
-
-- 특성별 기여도 분석을 통한 지속적 개선
-- 새로운 사기 패턴 발견 및 대응
-
-### 4. 비즈니스 의사결정
-
-- 위험 관리 정책 수립에 활용
-- 비용-효과 분석을 통한 최적화
-
-## 🛠️ 설치 및 실행
-
-### 요구사항
-
-```bash
-Python 3.8+
-pandas, numpy, scikit-learn
-matplotlib, seaborn, plotly
-shap (XAI 라이브러리)
-```
-
-### 설치
-
-```bash
-git clone <repository-url>
-cd XAI
-pip install -r requirements.txt
-```
-
-### 실행
-
-```bash
-# XAI 분석 실행
-python notebooks/05_xai_model_explanation.py
-
-# Jupyter 노트북 실행
-jupyter notebook notebooks/eda_model_train.ipynb
-```
-
-## 📚 주요 파일 설명
-
-- **`eda_model_train.ipynb`**: 데이터 탐색, 전처리, 모델 학습
-- **`05_xai_model_explanation.py`**: XAI 분석 및 모델 선택 이유 설명
-- **`05_xai_model_explanation.md`**: XAI 분석 결과 요약 문서
-
-## 🎯 핵심 결론
-
-**Gaussian Naive Bayes는 금융 보안의 핵심 요구사항인 '사기를 놓치지 않는 것'을 완벽하게 충족하면서도, 모델의 투명성과 해석 가능성을 제공하는 최적의 선택입니다.**
-
-비록 정밀도 측면에서는 완벽하지 않지만, 금융 사기 탐지라는 도메인에서는 **안전을 위한 보수적 접근**이 더욱 중요하며, 이는 비즈니스 요구사항과 완벽하게 일치합니다.
-
-## 📞 문의
-
-프로젝트에 대한 질문이나 제안사항이 있으시면 언제든지 연락주세요.
+- **목표**: 높은 탐지 성능과 함께, “왜” 특정 거래가 이상하다고 판단되었는지에 대한 **투명하고 직관적인 설명** 제공
+- **활용 기술**:
+  - 머신러닝 기반 이상거래 탐지(RandomForest, GradientBoosting, XGBoost, LightGBM 등)
+  - XAI 기법 (SHAP, LIME, Counterfactual Explanation)
+  - GPT 기반 보고서 자동화
 
 ---
 
-**프로젝트 기여자**: [이름]
-**최종 업데이트**: 2024년 12월
+## 2. 프로젝트 구조
+
+📂 XAI-Fraud-Detection
+│
+├── data/ # 데이터셋
+│ ├── raw/ # 원본 데이터 (예: PaySim, IEEE-CIS Fraud Detection)
+│ ├── processed/ # 전처리된 데이터
+│ └── shap_values/ # SHAP 값 저장 폴더
+│
+├── models/
+│ ├── naive_bayes_model.pkl # 기존 모델
+│ ├── enhanced_best_model.pkl # 최적 성능 모델
+│ └── scaler.pkl # 표준화 객체
+│
+├── notebooks/
+│ ├── data_preprocessing.ipynb # 데이터 전처리 & 파생변수 생성
+│ ├── model_training.ipynb # 모델 학습 & 평가
+│ ├── xai_analysis.ipynb # SHAP, LIME 분석
+│ └── gpt_report_generation.ipynb # STR 보고서 생성
+│
+├── src/
+│ ├── save_model.py # 기존 모델 학습 스크립트
+│ ├── enhanced_fraud_detection.py # 개선 모델 학습 스크립트
+│ ├── xai_analysis.py # XAI 해석 로직
+│ ├── report_generator.py # GPT 보고서 생성
+│ └── utils.py # 공통 함수
+│
+├── requirements.txt # 필요한 패키지
+├── README.md # 프로젝트 설명서 (본 파일)
+└── LICENSE
+
+---
+
+## 3. 데이터셋
+
+본 프로젝트에서는 공개된 금융 이상거래 시뮬레이션 데이터셋을 사용합니다.
+
+### (1) PaySim Dataset
+
+- **출처**: Mobile Money Transactions 시뮬레이션 데이터
+- **특징**:
+  - 거래 ID, 금액, 거래유형, 송·수신 계좌, 잔액 변화 등 포함
+  - 사기 거래 여부(`isFraud`) 및 시도된 사기 거래(`isFlaggedFraud`) 라벨 포함
+- **전처리**:
+  - 결측치 제거 및 이상값 처리
+  - 범주형 변수 원-핫 인코딩
+  - 파생 변수 생성 (잔액 변화율, 거래 빈도, 거래 시간 간격 등)
+  - SMOTE를 통한 클래스 불균형 해결
+
+### (2) IEEE-CIS Fraud Detection Dataset _(선택적)_
+
+- **출처**: IEEE Computational Intelligence Society
+- **특징**:
+  - 대규모 e-커머스 결제 데이터
+  - 수백 개의 익명화된 피처 포함
+  - 복잡한 결제 패턴 기반 사기 탐지 가능
+
+---
+
+## 4. 주요 기능
+
+1. **이상거래 탐지 모델 학습**
+   - 앙상블 및 부스팅 기반 모델 적용
+   - GridSearchCV로 하이퍼파라미터 튜닝
+2. **XAI 분석**
+   - SHAP: 전역·로컬 피처 중요도 분석
+   - LIME: 개별 거래 예측 근거 설명
+   - Counterfactual: “만약 ~였다면” 시나리오 분석
+3. **STR 보고서 자동화**
+   - XAI 분석 결과를 기반으로 GPT가 자동 문장 생성
+   - 보고서 템플릿 기반 PDF 또는 DOCX 출력
+
+---
+
+## 5. 설치 & 실행 방법
+
+```bash
+# 1. 저장소 클론
+git clone https://github.com/username/XAI-Fraud-Detection.git
+cd XAI-Fraud-Detection
+
+# 2. 가상환경 생성 및 활성화
+conda create -n xai_fds python=3.9
+conda activate xai_fds
+
+# 3. 필수 패키지 설치
+pip install -r requirements.txt
+
+# 4. 데이터 전처리 실행
+python src/data_preprocessing.py
+
+# 5. 모델 학습
+python src/enhanced_fraud_detection.py
+
+# 6. XAI 분석
+python src/xai_analysis.py
+
+# 7. STR 보고서 생성
+python src/report_generator.py
+```

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>상세 분석 결과 - XAI 금융 사기 탐지 시스템</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .nav-bar {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 15px 0;
+        margin-bottom: 30px;
+        border-radius: 15px;
+      }
+
+      .nav-bar .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-bar a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+      }
+
+      .nav-bar a:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .nav-bar a.active {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 20px;
+      }
+
+      .feature-breakdown {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .feature-breakdown h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .feature-detail {
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        border-left: 4px solid #667eea;
+      }
+
+      .feature-detail h3 {
+        color: #2d3748;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .feature-detail p {
+        color: #718096;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      .feature-detail ul {
+        margin-left: 20px;
+        color: #718096;
+      }
+
+      .feature-detail li {
+        margin-bottom: 5px;
+      }
+
+      .shap-visualization {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .shap-visualization h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .shap-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 20px;
+      }
+
+      .shap-image {
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .shap-image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .performance-metrics {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .performance-metrics h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .metric-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .metric-item:last-child {
+        border-bottom: none;
+      }
+
+      .metric-name {
+        font-weight: 500;
+        color: #2d3748;
+      }
+
+      .metric-value {
+        font-weight: 700;
+        color: #667eea;
+        font-size: 1.1rem;
+      }
+
+      .footer {
+        text-align: center;
+        color: white;
+        opacity: 0.8;
+        margin-top: 40px;
+      }
+
+      @media (max-width: 768px) {
+        .analysis-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+
+      .highlight-box {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .highlight-box h3 {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+      }
+
+      .highlight-box p {
+        opacity: 0.9;
+        line-height: 1.5;
+      }
+
+      .shap-analysis {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .shap-analysis h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .feature-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .feature-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #e2e8f0;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      }
+
+      .feature-card.primary {
+        border-top: 4px solid #e53e3e;
+      }
+
+      .feature-card.secondary {
+        border-top: 4px solid #ed8936;
+      }
+
+      .feature-card.tertiary {
+        border-top: 4px solid #ecc94b;
+      }
+
+      .feature-header {
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        position: relative;
+      }
+
+      .feature-number {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+
+      .feature-header h3 {
+        color: #2d3748;
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      .shap-value {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+      }
+
+      .feature-content {
+        padding: 20px;
+      }
+
+      .feature-description {
+        color: #4a5568;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        font-style: italic;
+      }
+
+      .feature-pattern h4 {
+        color: #2d3748;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .feature-pattern p {
+        color: #4a5568;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+      }
+
+      .feature-pattern ul {
+        margin-left: 20px;
+        color: #4a5568;
+      }
+
+      .feature-pattern li {
+        margin-bottom: 8px;
+        line-height: 1.5;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="container">
+        <a href="index.html"><i class="fas fa-home"></i> 홈</a>
+        <a href="analysis.html" class="active"
+          ><i class="fas fa-chart-bar"></i> 상세 분석</a
+        >
+        <a href="reports.html"><i class="fas fa-file-alt"></i> 보고서 생성</a>
+        <a href="#"><i class="fas fa-cog"></i> 설정</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <h1><i class="fas fa-chart-line"></i> 상세 분석 결과</h1>
+        <p>XAI 모델의 성능과 SHAP 분석 결과를 자세히 살펴보세요</p>
+      </div>
+
+      <div class="highlight-box">
+        <h3>🎯 핵심 성과 요약</h3>
+        <p>
+          PaySim 전체 데이터(636만 건) 중 127만 건으로 실험하여 95.1%의 재현율과
+          86.7%의 정밀도로 사기 거래를 정확하게 탐지했습니다.
+        </p>
+      </div>
+
+      <div class="shap-visualization">
+        <h2><i class="fas fa-microscope"></i> 전체 SHAP 시각화 결과</h2>
+        <p style="color: #718096; margin-bottom: 20px">
+          전체 데이터셋에 대한 SHAP 분석 결과
+        </p>
+
+        <div class="shap-grid">
+          <div class="shap-image">
+            <h3>SHAP Bar Plot - 피처 중요도</h3>
+            <img
+              src="images/shap_bar.png"
+              alt="SHAP Bar Plot"
+              style="
+                max-width: 100%;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+              "
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            />
+            <div
+              style="
+                display: none;
+                background: #f7fafc;
+                padding: 40px;
+                border-radius: 10px;
+                border: 2px dashed #cbd5e0;
+              "
+            >
+              <h4
+                style="text-align: center; color: #718096; margin-bottom: 15px"
+              >
+                SHAP Bar Plot
+              </h4>
+              <p style="text-align: center; color: #718096; font-size: 0.9rem">
+                각 피처가 모델 예측에 미치는 영향력을 SHAP 값으로 정량화한
+                차트입니다.
+              </p>
+            </div>
+            <p style="margin-top: 10px; color: #718096; font-size: 0.9rem">
+              각 피처가 모델 예측에 미치는 영향력을 SHAP 값으로 정량화
+            </p>
+          </div>
+
+          <div class="shap-image">
+            <h3>SHAP Beeswarm Plot - 피처별 분포</h3>
+            <img
+              src="images/shap_bee.png"
+              alt="SHAP Beeswarm Plot"
+              style="
+                max-width: 100%;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+              "
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+            />
+            <div
+              style="
+                display: none;
+                background: #f7fafc;
+                padding: 40px;
+                border-radius: 10px;
+                border: 2px dashed #cbd5e0;
+              "
+            >
+              <h4
+                style="text-align: center; color: #718096; margin-bottom: 15px"
+              >
+                SHAP Beeswarm Plot
+              </h4>
+              <p style="text-align: center; color: #718096; font-size: 0.9rem">
+                피처 값과 SHAP 값의 관계를 보여주는 분포도입니다.
+              </p>
+            </div>
+            <p style="margin-top: 10px; color: #718096; font-size: 0.9rem">
+              피처 값과 SHAP 값의 관계를 보여주는 분포도
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-breakdown">
+        <h2><i class="fas fa-lightbulb"></i> 주요 피처 설명</h2>
+        <p style="color: #718096; margin-bottom: 25px; text-align: center">
+          사기 탐지에 가장 중요한 영향을 미치는 주요 특성들을 설명합니다
+        </p>
+
+        <div class="feature-cards">
+          <div class="feature-card primary">
+            <div class="feature-header">
+              <div class="feature-number">1</div>
+              <h3>현금 입금 유형</h3>
+              <div class="shap-value">SHAP: 174,645</div>
+            </div>
+            <div class="feature-content">
+              <p class="feature-description">
+                현금 입금 거래 유형이 사기 탐지에 미치는 영향
+              </p>
+              <div class="feature-pattern">
+                <h4>🔍 사기 패턴</h4>
+                <p>"대규모 현금 입금 → 즉시 인출" 패턴이 사기의 전형적 특징</p>
+                <ul>
+                  <li>잔액 0원 계좌에 1000만원 입금 후 1시간 내 전액 출금</li>
+                  <li>비정상적으로 잦은 CASH_IN 거래 발생</li>
+                  <li>입금과 출금의 시간 간격이 매우 짧음</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-card secondary">
+            <div class="feature-header">
+              <div class="feature-number">2</div>
+              <h3>잔액 대비 거래 금액 비율</h3>
+              <div class="shap-value">SHAP: 90,060</div>
+            </div>
+            <div class="feature-content">
+              <p class="feature-description">거래 금액과 계좌 잔액 간의 비율</p>
+              <div class="feature-pattern">
+                <h4>🔍 사기 패턴</h4>
+                <p>잔액에 비해 비정상적으로 큰 금액을 거래하는 경우</p>
+                <ul>
+                  <li>잔액 10만원인데 1000만원 거래 (비율 100:1)</li>
+                  <li>일반적인 거래 패턴과 비교했을 때 급격한 비율 증가</li>
+                  <li>계좌 잔액 대비 거래 금액의 비정상적 비율</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-card tertiary">
+            <div class="feature-header">
+              <div class="feature-number">3</div>
+              <h3>송금인 계좌 잔액</h3>
+              <div class="shap-value">SHAP: 40,125</div>
+            </div>
+            <div class="feature-content">
+              <p class="feature-description">송금인 계좌의 거래 전 잔액</p>
+              <div class="feature-pattern">
+                <h4>🔍 사기 패턴</h4>
+                <p>사기 계좌는 보통 낮은 잔액이나 불규칙한 패턴을 보임</p>
+                <ul>
+                  <li>잔액이 0원이거나 매우 낮은 상태에서 대규모 거래 발생</li>
+                  <li>잔액 변화가 급격하고 불규칙함</li>
+                  <li>정상적인 잔액 유지 패턴과의 차이</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shap-analysis">
+        <h2><i class="fas fa-microscope"></i> 개별 거래 SHAP 분석</h2>
+        <p style="color: #718096; margin-bottom: 20px">
+          주요 의심거래에 대한 모델의 판단 근거 분석
+        </p>
+
+        <div class="feature-cards">
+          <div class="feature-card primary">
+            <div class="feature-header">
+              <div class="feature-number">1</div>
+              <h3>거래 #9770 ✅</h3>
+              <div class="shap-value">사기 확률: 95.2%</div>
+            </div>
+            <div class="feature-content">
+              <div class="feature-description">
+                <p><strong>예측:</strong> 사기 | <strong>실제:</strong> 사기</p>
+                <p><strong>주요 근거:</strong></p>
+                <ul>
+                  <li>type_CASH_IN: +39,461</li>
+                  <li>amount_to_balance_ratio: +30,624</li>
+                  <li>oldbalanceOrg: +21,934</li>
+                </ul>
+              </div>
+              <div class="feature-pattern">
+                <h4>🔍 SHAP Waterfall Plot</h4>
+                <img
+                  src="images/individual_shap_transaction_9770.png"
+                  alt="거래 #9770 SHAP 분석"
+                  style="
+                    max-width: 100%;
+                    border-radius: 8px;
+                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+                    margin-top: 15px;
+                  "
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+                <div
+                  style="
+                    display: none;
+                    background: #f7fafc;
+                    padding: 20px;
+                    border-radius: 8px;
+                    border: 2px dashed #cbd5e0;
+                    margin-top: 15px;
+                  "
+                >
+                  <h6
+                    style="
+                      text-align: center;
+                      color: #718096;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    거래 #9770 SHAP Waterfall Plot
+                  </h6>
+                  <p
+                    style="
+                      text-align: center;
+                      color: #718096;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    이 거래의 각 피처가 사기 판단에 미치는 영향력을 보여주는
+                    차트입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-card secondary">
+            <div class="feature-header">
+              <div class="feature-number">2</div>
+              <h3>거래 #9771 ✅</h3>
+              <div class="shap-value">사기 확률: 94.8%</div>
+            </div>
+            <div class="feature-content">
+              <div class="feature-description">
+                <p><strong>예측:</strong> 사기 | <strong>실제:</strong> 사기</p>
+                <p><strong>주요 근거:</strong></p>
+                <ul>
+                  <li>type_CASH_IN: +39,464</li>
+                  <li>amount_to_balance_ratio: +30,702</li>
+                  <li>oldbalanceOrg: +18,160</li>
+                </ul>
+              </div>
+              <div class="feature-pattern">
+                <h4>🔍 SHAP Waterfall Plot</h4>
+                <img
+                  src="images/individual_shap_transaction_9771.png"
+                  alt="거래 #9771 SHAP 분석"
+                  style="
+                    max-width: 100%;
+                    border-radius: 8px;
+                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+                    margin-top: 15px;
+                  "
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+                <div
+                  style="
+                    display: none;
+                    background: #f7fafc;
+                    padding: 20px;
+                    border-radius: 8px;
+                    border: 2px dashed #cbd5e0;
+                    margin-top: 15px;
+                  "
+                >
+                  <h6
+                    style="
+                      text-align: center;
+                      color: #718096;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    거래 #9771 SHAP Waterfall Plot
+                  </h6>
+                  <p
+                    style="
+                      text-align: center;
+                      color: #718096;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    이 거래의 각 피처가 사기 판단에 미치는 영향력을 보여주는
+                    차트입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-card tertiary">
+            <div class="feature-header">
+              <div class="feature-number">3</div>
+              <h3>거래 #22133 ✅</h3>
+              <div class="shap-value">사기 확률: 97.3%</div>
+            </div>
+            <div class="feature-content">
+              <div class="feature-description">
+                <p><strong>예측:</strong> 사기 | <strong>실제:</strong> 사기</p>
+                <p><strong>주요 근거:</strong></p>
+                <ul>
+                  <li>type_CASH_IN: +68,413</li>
+                  <li>type_PAYMENT: +53,484</li>
+                  <li>oldbalanceOrg: -46,158</li>
+                </ul>
+              </div>
+              <div class="feature-pattern">
+                <h4>🔍 SHAP Waterfall Plot</h4>
+                <img
+                  src="images/individual_shap_transaction_22133.png"
+                  alt="거래 #22133 SHAP 분석"
+                  style="
+                    max-width: 100%;
+                    border-radius: 8px;
+                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+                    margin-top: 15px;
+                  "
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                />
+                <div
+                  style="
+                    display: none;
+                    background: #f7fafc;
+                    padding: 20px;
+                    border-radius: 8px;
+                    border: 2px dashed #cbd5e0;
+                    margin-top: 15px;
+                  "
+                >
+                  <h6
+                    style="
+                      text-align: center;
+                      color: #718096;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    거래 #22133 SHAP Waterfall Plot
+                  </h6>
+                  <p
+                    style="
+                      text-align: center;
+                      color: #718096;
+                      font-size: 0.8rem;
+                    "
+                  >
+                    이 거래의 각 피처가 사기 판단에 미치는 영향력을 보여주는
+                    차트입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>© 2024 XAI 금융 사기 탐지 시스템 | 아주대학교 소프트콘 대회</p>
+      </div>
+    </div>
+
+    <script>
+      // 정밀도-재현율 성능 곡선 제거됨
+
+      // 피처 중요도 차트 제거됨 (SHAP Bar plot과 중복)
+
+      // 애니메이션 효과
+      document.addEventListener("DOMContentLoaded", function () {
+        const cards = document.querySelectorAll(
+          ".feature-breakdown, .shap-visualization, .feature-card, .shap-analysis"
+        );
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        });
+
+        cards.forEach((card) => {
+          card.style.opacity = "0";
+          card.style.transform = "translateY(20px)";
+          card.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+          observer.observe(card);
+        });
+      });
+    </script>
+  </body>
+</html>

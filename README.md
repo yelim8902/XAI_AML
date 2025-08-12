@@ -140,13 +140,13 @@ python scripts/generate_report.py --analysis_period "2025-08-01 ~ 2025-08-11"
 
 ## 📊 결과물 예시
 
-| 결과물     | 설명                         | 예시 경로                                       |
-| ---------- | ---------------------------- | ----------------------------------------------- |
-| 모델 파일  | 학습된 모델 객체             | `outputs/models/model.joblib`                   |
-| 성능 지표  | JSON, Confusion Matrix CSV   | `outputs/metrics/classification_report.json`    |
-| XAI 시각화 | SHAP Bar Plot, Beeswarm Plot | `outputs/figures/shap_bar.png`                  |
-| 개별 거래 분석 | 거래별 SHAP Waterfall Plot | `outputs/figures/individual_shap_transaction_*.png` |
-| 보고서     | STR 보고서 (Markdown/HTML)   | `outputs/reports/STR_Report.md/html`            |
+| 결과물         | 설명                         | 예시 경로                                           |
+| -------------- | ---------------------------- | --------------------------------------------------- |
+| 모델 파일      | 학습된 모델 객체             | `outputs/models/model.joblib`                       |
+| 성능 지표      | JSON, Confusion Matrix CSV   | `outputs/metrics/classification_report.json`        |
+| XAI 시각화     | SHAP Bar Plot, Beeswarm Plot | `outputs/figures/shap_bar.png`                      |
+| 개별 거래 분석 | 거래별 SHAP Waterfall Plot   | `outputs/figures/individual_shap_transaction_*.png` |
+| 보고서         | STR 보고서 (Markdown/HTML)   | `outputs/reports/STR_Report.md/html`                |
 
 ---
 
@@ -167,6 +167,7 @@ python scripts/generate_report.py --analysis_period "2025-08-01 ~ 2025-08-11"
 ## 🛠 환경 설정
 
 ### **1. 기본 환경 설정**
+
 ```bash
 conda create -n xai_env python=3.10
 conda activate xai_env
@@ -174,6 +175,7 @@ pip install -r requirements.txt
 ```
 
 ### **2. OpenAI API 키 설정**
+
 LLM 기반 자동 해석 기능을 사용하려면 OpenAI API 키가 필요합니다.
 
 ```bash
@@ -189,6 +191,7 @@ source ~/.zshrc
 ```
 
 ### **3. 필요한 패키지**
+
 - **기본**: pandas, numpy, scikit-learn, matplotlib, seaborn
 - **XAI**: shap, lime
 - **LLM**: openai

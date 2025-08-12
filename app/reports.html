@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM 기반 보고서 생성 - XAI 금융 사기 탐지 시스템</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .nav-bar {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 15px 0;
+        margin-bottom: 30px;
+        border-radius: 15px;
+      }
+
+      .nav-bar .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-bar a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+      }
+
+      .nav-bar a:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .nav-bar a.active {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+      }
+
+      .report-generator {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+      }
+
+      .report-generator h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .input-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .input-group label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #2d3748;
+      }
+
+      .input-group input,
+      .input-group select {
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+      }
+
+      .input-group input:focus,
+      .input-group select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .generate-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .loading i {
+        font-size: 2rem;
+        color: #667eea;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .report-result {
+        background: #f7fafc;
+        padding: 25px;
+        border-radius: 15px;
+        border-left: 4px solid #667eea;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .report-result h3 {
+        color: #2d3748;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+      }
+
+      .report-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        line-height: 1.6;
+        color: #2d3748;
+      }
+
+      .report-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .action-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .download-btn {
+        background: #48bb78;
+        color: white;
+      }
+
+      .download-btn:hover {
+        background: #38a169;
+      }
+
+      .copy-btn {
+        background: #667eea;
+        color: white;
+      }
+
+      .copy-btn:hover {
+        background: #5a67d8;
+      }
+
+      .sample-reports {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .sample-reports h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .sample-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .sample-card {
+        background: #f7fafc;
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 4px solid #48bb78;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .sample-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .sample-card h4 {
+        color: #2d3748;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+      }
+
+      .sample-card p {
+        color: #718096;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      .footer {
+        text-align: center;
+        color: white;
+        opacity: 0.8;
+        margin-top: 40px;
+      }
+
+      /* 페이지 설명 섹션 스타일 */
+      .page-description {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        color: white;
+        text-align: center;
+      }
+
+      .page-description h3 {
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .description-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+      }
+
+      .description-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+      }
+
+      .description-item:hover {
+        transform: translateY(-2px);
+      }
+
+      .description-item i {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        display: block;
+        color: #667eea;
+      }
+
+      .description-item strong {
+        color: white;
+        font-size: 1rem;
+      }
+
+      .description-item small {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+
+      .description-tip {
+        margin-top: 20px;
+        opacity: 0.9;
+        font-size: 0.95rem;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .input-section {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="container">
+        <a href="index.html"><i class="fas fa-home"></i> 홈</a>
+        <a href="analysis.html"><i class="fas fa-chart-bar"></i> 상세 분석</a>
+        <a href="reports.html" class="active"
+          ><i class="fas fa-file-alt"></i> 보고서 생성</a
+        >
+        <a href="#"><i class="fas fa-cog"></i> 설정</a>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <h1><i class="fas fa-robot"></i> LLM 기반 보고서 생성</h1>
+        <p>
+          AI가 SHAP 분석 결과를 바탕으로 전문적인 금융 사기 탐지 보고서를
+          작성합니다
+        </p>
+      </div>
+
+      <!-- 페이지 설명 섹션 추가 -->
+      <div class="page-description">
+        <h3>
+          <i class="fas fa-info-circle"></i> 이 페이지에서 확인할 수 있는 것들
+        </h3>
+        <div class="description-grid">
+          <div class="description-item">
+            <i class="fas fa-magic"></i>
+            <strong>AI 보고서 생성</strong><br />
+            <small
+              >거래 ID와 보고서 유형을 선택하여 전문 보고서 자동 생성</small
+            >
+          </div>
+          <div class="description-item">
+            <i class="fas fa-lightbulb"></i>
+            <strong>샘플 보고서</strong><br />
+            <small>3가지 거래에 대한 미리 생성된 전문 분석 보고서</small>
+          </div>
+          <div class="description-item">
+            <i class="fas fa-download"></i>
+            <strong>다운로드/복사</strong><br />
+            <small
+              >생성된 보고서를 텍스트 파일로 저장하거나 클립보드에 복사</small
+            >
+          </div>
+        </div>
+        <p class="description-tip">
+          💡 <strong>팁:</strong> 홈 페이지에서 전체 성과 요약을, 상세 분석
+          페이지에서 SHAP 분석 결과를 확인할 수 있습니다.
+        </p>
+      </div>
+
+      <div class="report-generator">
+        <h2><i class="fas fa-magic"></i> 보고서 생성기</h2>
+
+        <div class="input-section">
+          <div class="input-group">
+            <label for="transactionId">거래 ID</label>
+            <select id="transactionId">
+              <option value="">거래를 선택하세요</option>
+              <option value="9770">거래 #9770 (사기 탐지)</option>
+              <option value="9771">거래 #9771 (사기 탐지)</option>
+              <option value="22133">거래 #22133 (사기 탐지)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="reportType">보고서 유형</label>
+            <select id="reportType">
+              <option value="detailed">상세 분석 보고서</option>
+              <option value="executive">경영진 요약 보고서</option>
+              <option value="regulatory">규제 기관 보고서</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="generate-btn" onclick="generateReport()">
+          <i class="fas fa-magic"></i> AI 보고서 생성
+        </button>
+
+        <div class="loading" id="loading">
+          <i class="fas fa-spinner"></i>
+          <p>AI가 보고서를 작성하고 있습니다...</p>
+        </div>
+
+        <div class="report-result" id="reportResult">
+          <h3><i class="fas fa-file-alt"></i> 생성된 보고서</h3>
+          <div class="report-content" id="reportContent">
+            <!-- 보고서 내용이 여기에 표시됩니다 -->
+          </div>
+
+          <div class="report-actions">
+            <button class="action-btn download-btn" onclick="downloadReport()">
+              <i class="fas fa-download"></i> 다운로드
+            </button>
+            <button class="action-btn copy-btn" onclick="copyReport()">
+              <i class="fas fa-copy"></i> 복사
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sample-reports">
+        <h2><i class="fas fa-lightbulb"></i> 샘플 보고서 예시</h2>
+
+        <div class="sample-grid">
+          <div class="sample-card" onclick="loadSampleReport('9770')">
+            <h4>거래 #9770 분석 보고서</h4>
+            <p>
+              현금 입금 유형과 잔액 대비 거래 금액 비율이 주요 위험 요소로
+              작용한 사례 분석
+            </p>
+          </div>
+
+          <div class="sample-card" onclick="loadSampleReport('9771')">
+            <h4>거래 #9771 분석 보고서</h4>
+            <p>
+              계좌 잔액과 거래 패턴의 불일치를 통한 사기 탐지 과정 상세 분석
+            </p>
+          </div>
+
+          <div class="sample-card" onclick="loadSampleReport('22133')">
+            <h4>거래 #22133 분석 보고서</h4>
+            <p>복합적 위험 요소가 결합된 고위험 사기 거래의 다차원적 분석</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>© 2024 XAI 금융 사기 탐지 시스템 | 아주대학교 소프트콘 대회</p>
+      </div>
+    </div>
+
+    <script>
+      // 샘플 보고서 데이터
+      const sampleReports = {
+        9770: {
+          title: "거래 #9770 사기 탐지 분석 보고서",
+          content: `## 🚨 위험도 요약
+**위험 등급**: 높음 (High Risk)
+**사기 확률**: 95.2%
+**권장 조치**: 즉시 거래 중단 및 추가 조사
+
+## 🔍 주요 판단 근거
+
+### 1. 현금 입금 유형 (SHAP: +39,461)
+- **위험 요소**: CASH_IN 거래 유형이 사기 탐지에 가장 큰 영향
+- **패턴 분석**: 대규모 현금 입금 후 즉시 인출하는 전형적 사기 패턴
+- **일반적 거래와의 차이**: 정상적인 현금 입금은 보통 소액이거나 단계적 진행
+
+### 2. 잔액 대비 거래 금액 비율 (SHAP: +30,624)
+- **위험 요소**: 잔액에 비해 비정상적으로 큰 거래 금액
+- **정량적 분석**: 일반적으로 잔액의 10-20% 내에서 거래하는 것이 정상
+- **이 거래의 특징**: 잔액 대비 100배 이상의 거래 금액
+
+### 3. 송금인 계좌 잔액 (SHAP: +21,934)
+- **위험 요소**: 낮은 계좌 잔액에서 대규모 거래 발생
+- **패턴 분석**: 사기 계좌의 전형적 특징으로, 자금을 빠르게 소진하려는 의도
+- **일반적 거래와의 차이**: 정상적인 대규모 거래는 보통 충분한 잔액 유지
+
+## 📊 SHAP 분석 결과
+이 거래는 세 가지 주요 위험 요소가 모두 높은 수치를 보이며, 특히 현금 입금 유형의 영향력이 압도적입니다. 이는 전형적인 "펌프 앤 덤프" 사기 패턴과 일치합니다.
+
+## 🛡️ 권장 조치사항
+1. **즉시 조치**: 거래 중단 및 계좌 동결
+2. **추가 조사**: 송금인/수취인 계좌의 거래 이력 분석
+3. **규제 보고**: STR(Suspicious Transaction Report) 제출
+4. **고객 연락**: 계좌 소유자에게 거래 확인 요청
+
+## 📈 향후 모니터링
+- 유사한 패턴의 거래 발생 시 즉시 알림
+- 계좌별 위험도 점수 지속적 업데이트
+- 사기 패턴 데이터베이스에 새로운 패턴 추가`,
+        },
+        9771: {
+          title: "거래 #9771 사기 탐지 분석 보고서",
+          content: `## 🚨 위험도 요약
+**위험 등급**: 높음 (High Risk)
+**사기 확률**: 94.8%
+**권장 조치**: 거래 중단 및 심층 조사
+
+## 🔍 주요 판단 근거
+
+### 1. 현금 입금 유형 (SHAP: +39,464)
+- **위험 요소**: CASH_IN 거래 유형의 높은 영향력
+- **패턴 분석**: 거래 #9770과 유사한 사기 패턴
+- **연관성**: 동일한 사기 조직의 활동 가능성
+
+### 2. 잔액 대비 거래 금액 비율 (SHAP: +30,702)
+- **위험 요소**: 극도로 높은 거래 금액 비율
+- **정량적 분석**: 일반적인 거래 범위를 크게 벗어남
+- **사기 지표**: 잔액 대비 150배 이상의 거래
+
+### 3. 송금인 계좌 잔액 (SHAP: +18,160)
+- **위험 요소**: 불규칙한 잔액 패턴
+- **패턴 분석**: 급격한 잔액 변화와 대규모 거래의 불일치
+- **일반적 거래와의 차이**: 정상적인 대규모 거래는 안정적인 잔액 유지
+
+## 📊 SHAP 분석 결과
+이 거래는 거래 #9770과 매우 유사한 패턴을 보이며, 동일한 사기 조직의 활동일 가능성이 높습니다. 특히 현금 입금 유형의 영향력이 압도적입니다.
+
+## 🛡️ 권장 조치사항
+1. **즉시 조치**: 거래 중단 및 계좌 동결
+2. **연관성 분석**: 거래 #9770과의 연관성 조사
+3. **조직적 사기 탐지**: 동일한 패턴의 다른 거래 검색
+4. **규제 보고**: STR 제출 및 수사 기관 연락
+
+## 📈 향후 모니터링
+- 유사한 패턴의 거래 발생 시 즉시 알림
+- 조직적 사기 활동 패턴 데이터베이스 구축
+- 계좌 간 연관성 분석 강화`,
+        },
+        22133: {
+          title: "거래 #22133 사기 탐지 분석 보고서",
+          content: `## 🚨 위험도 요약
+**위험 등급**: 매우 높음 (Critical Risk)
+**사기 확률**: 97.3%
+**권장 조치**: 즉시 긴급 조치 및 수사 기관 연락
+
+## 🔍 주요 판단 근거
+
+### 1. 현금 입금 유형 (SHAP: +68,413)
+- **위험 요소**: 압도적으로 높은 현금 입금 영향력
+- **패턴 분석**: 가장 위험한 수준의 현금 입금 패턴
+- **일반적 거래와의 차이**: 정상적인 현금 입금과 비교 불가능한 수준
+
+### 2. 결제 거래 유형 (SHAP: +53,484)
+- **위험 요소**: 결제 거래와 현금 입금의 복합적 위험
+- **패턴 분석**: 이중 사기 구조로, 현금 입금 후 결제 거래로 자금 이동
+- **사기 기법**: "레이어링" 기법을 통한 자금 세탁 의도
+
+### 3. 송금인 계좌 잔액 (SHAP: -46,158)
+- **위험 요소**: 음의 SHAP 값으로 인한 위험도 증가
+- **패턴 분석**: 높은 잔액이 오히려 사기 가능성을 높이는 특수한 경우
+- **일반적 거래와의 차이**: 정상적인 고잔액 계좌와는 다른 패턴
+
+## 📊 SHAP 분석 결과
+이 거래는 세 가지 주요 위험 요소가 모두 극도로 높은 수치를 보이며, 특히 현금 입금과 결제 거래의 복합적 위험이 특징입니다. 이는 정교한 자금 세탁 기법을 사용한 조직적 사기일 가능성이 높습니다.
+
+## 🛡️ 권장 조치사항
+1. **긴급 조치**: 즉시 모든 관련 계좌 동결
+2. **수사 기관 연락**: 금융수사대 및 검찰청 연락
+3. **국제 협력**: FATF 및 국제 금융 정보 기구에 정보 공유
+4. **고객 보호**: 피해자 보호 및 피해 최소화 조치
+
+## 📈 향후 모니터링
+- 국제적 사기 조직 활동 패턴 데이터베이스 구축
+- 복합적 위험 요소를 가진 거래의 실시간 모니터링
+- 국제 금융기관과의 정보 공유 체계 강화`,
+        },
+      };
+
+      async function generateReport() {
+        const transactionId = document.getElementById("transactionId").value;
+        const reportType = document.getElementById("reportType").value;
+
+        if (!transactionId) {
+          alert("거래를 선택해주세요.");
+          return;
+        }
+
+        // 로딩 표시
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("reportResult").style.display = "none";
+        document.querySelector(".generate-btn").disabled = true;
+
+        try {
+          // Flask API 호출
+          const response = await fetch(
+            "http://localhost:5001/api/generate-report",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                transaction_id: transactionId,
+                report_type: reportType,
+              }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.success) {
+            const report = {
+              title: `거래 #${transactionId} ${
+                reportType === "detailed"
+                  ? "상세 분석"
+                  : reportType === "executive"
+                  ? "경영진 요약"
+                  : "규제 기관"
+              } 보고서`,
+              content: data.content,
+            };
+            displayReport(report);
+          } else {
+            alert(
+              "보고서 생성에 실패했습니다: " + (data.error || "알 수 없는 오류")
+            );
+          }
+        } catch (error) {
+          console.error("API 호출 오류:", error);
+          alert(
+            "서버 연결에 실패했습니다. Flask 서버가 실행 중인지 확인해주세요."
+          );
+        } finally {
+          document.getElementById("loading").style.display = "none";
+          document.querySelector(".generate-btn").disabled = false;
+        }
+      }
+
+      function generateAIReport(transactionId, reportType) {
+        const baseReport = sampleReports[transactionId];
+        let report = baseReport.content;
+
+        // 보고서 유형에 따른 커스터마이징
+        if (reportType === "executive") {
+          report = report.replace("## 🚨 위험도 요약", "## 📊 경영진 요약");
+          report = report.replace(
+            "## 🔍 주요 판단 근거",
+            "## 🎯 핵심 위험 요소"
+          );
+          report = report.replace(
+            "## 📊 SHAP 분석 결과",
+            "## 📈 비즈니스 영향"
+          );
+          report = report.replace(
+            "## 🛡️ 권장 조치사항",
+            "## 💼 경영진 권고사항"
+          );
+          report = report.replace("## 📈 향후 모니터링", "## 🔮 전략적 방향");
+        } else if (reportType === "regulatory") {
+          report = report.replace("## 🚨 위험도 요약", "## ⚠️ 규제 준수 요약");
+          report = report.replace(
+            "## 🔍 주요 판단 근거",
+            "## 📋 규제 위반 요소"
+          );
+          report = report.replace(
+            "## 📊 SHAP 분석 결과",
+            "## 📊 규제 준수 분석"
+          );
+          report = report.replace(
+            "## 🛡️ 권장 조치사항",
+            "## 📝 규제 기관 보고 요항"
+          );
+          report = report.replace(
+            "## 📈 향후 모니터링",
+            "## 🔍 규제 감독 계획"
+          );
+        }
+
+        return {
+          title: baseReport.title,
+          content: report,
+        };
+      }
+
+      function displayReport(report) {
+        document.getElementById("reportContent").innerHTML = report.content;
+        document.getElementById("reportResult").style.display = "block";
+      }
+
+      function loadSampleReport(transactionId) {
+        document.getElementById("transactionId").value = transactionId;
+        const report = sampleReports[transactionId];
+        displayReport(report);
+      }
+
+      function downloadReport() {
+        const content = document.getElementById("reportContent").innerText;
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "사기탐지_보고서.txt";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
+      function copyReport() {
+        const content = document.getElementById("reportContent").innerText;
+        navigator.clipboard.writeText(content).then(() => {
+          alert("보고서가 클립보드에 복사되었습니다.");
+        });
+      }
+    </script>
+  </body>
+</html>

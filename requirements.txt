@@ -7,3 +7,6 @@ matplotlib
 seaborn
 joblib
 openai
+flask
+flask-cors
+numpy

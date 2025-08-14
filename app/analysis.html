@@ -296,6 +296,40 @@
         border-top: 4px solid #ecc94b;
       }
 
+      .feature-more-section {
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .btn-secondary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary.expanded {
+        background: linear-gradient(135deg, #ed8936, #dd6b20);
+      }
+
+      .btn-secondary.expanded:hover {
+        box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+      }
+
       .feature-header {
         background: linear-gradient(135deg, #f7fafc, #edf2f7);
         padding: 20px;
@@ -486,7 +520,7 @@
           사기 탐지에 가장 중요한 영향을 미치는 주요 특성들을 설명합니다
         </p>
 
-        <div class="feature-cards">
+        <div class="feature-cards" id="featureCards">
           <div class="feature-card primary">
             <div class="feature-header">
               <div class="feature-number">1</div>
@@ -549,6 +583,19 @@
             </div>
           </div>
         </div>
+
+        <div
+          class="feature-more-section"
+          style="text-align: center; margin-top: 20px"
+        >
+          <button
+            id="showMoreFeatures"
+            class="btn-secondary"
+            onclick="toggleFeatureList()"
+          >
+            <i class="fas fa-chevron-down"></i> 더보기
+          </button>
+        </div>
       </div>
 
       <div class="shap-analysis">
@@ -557,8 +604,8 @@
           주요 의심거래에 대한 모델의 판단 근거 분석
         </p>
 
-        <div class="feature-cards">
-          <div class="feature-card primary">
+        <div class="feature-cards" id="shapCards">
+          <div class="feature-card primary" data-transaction="9770">
             <div class="feature-header">
               <div class="feature-number">1</div>
               <h3>거래 #9770 ✅</h3>
@@ -621,7 +668,7 @@
             </div>
           </div>
 
-          <div class="feature-card secondary">
+          <div class="feature-card secondary" data-transaction="9771">
             <div class="feature-header">
               <div class="feature-number">2</div>
               <h3>거래 #9771 ✅</h3>
@@ -684,7 +731,7 @@
             </div>
           </div>
 
-          <div class="feature-card tertiary">
+          <div class="feature-card tertiary" data-transaction="22133">
             <div class="feature-header">
               <div class="feature-number">3</div>
               <h3>거래 #22133 ✅</h3>
@@ -747,10 +794,23 @@
             </div>
           </div>
         </div>
+
+        <div
+          class="feature-more-section"
+          style="text-align: center; margin-top: 20px"
+        >
+          <button
+            id="showMoreShap"
+            class="btn-secondary"
+            onclick="toggleShapList()"
+          >
+            <i class="fas fa-chevron-down"></i> 더보기
+          </button>
+        </div>
       </div>
 
       <div class="footer">
-        <p>© 2024 XAI 금융 사기 탐지 시스템 | 아주대학교 소프트콘 대회</p>
+        <p>© 2025 XAI 금융 사기 탐지 시스템 | 이예림</p>
       </div>
     </div>
 
@@ -758,6 +818,41 @@
       // 정밀도-재현율 성능 곡선 제거됨
 
       // 피처 중요도 차트 제거됨 (SHAP Bar plot과 중복)
+
+      // 더보기 버튼 토글 함수들
+      function toggleFeatureList() {
+        const button = document.getElementById("showMoreFeatures");
+        const isExpanded = window.isFeatureListExpanded;
+
+        if (!isExpanded) {
+          // 전체 피처 표시
+          button.innerHTML = '<i class="fas fa-chevron-up"></i> 접기';
+          button.classList.add("expanded");
+          window.isFeatureListExpanded = true;
+        } else {
+          // 상위 3개만 표시
+          button.innerHTML = '<i class="fas fa-chevron-down"></i> 더보기';
+          button.classList.remove("expanded");
+          window.isFeatureListExpanded = false;
+        }
+      }
+
+      function toggleShapList() {
+        const button = document.getElementById("showMoreShap");
+        const isExpanded = window.isShapListExpanded;
+
+        if (!isExpanded) {
+          // 전체 SHAP 분석 표시
+          button.innerHTML = '<i class="fas fa-chevron-up"></i> 접기';
+          button.classList.add("expanded");
+          window.isShapListExpanded = true;
+        } else {
+          // 상위 3개만 표시
+          button.innerHTML = '<i class="fas fa-chevron-down"></i> 더보기';
+          button.classList.remove("expanded");
+          window.isShapListExpanded = false;
+        }
+      }
 
       // 애니메이션 효과
       document.addEventListener("DOMContentLoaded", function () {
@@ -780,6 +875,10 @@
           card.style.transition = "opacity 0.6s ease, transform 0.6s ease";
           observer.observe(card);
         });
+
+        // 더보기 버튼 초기화
+        window.isFeatureListExpanded = false;
+        window.isShapListExpanded = false;
       });
     </script>
   </body>

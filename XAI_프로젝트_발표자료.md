@@ -23,7 +23,7 @@
 
 ### 🔧 주요 기술 스택
 
-- **ML**: LightGBM, Random Forest
+- **ML**: LightGBM
 - **XAI**: SHAP (SHapley Additive exPlanations)
 - **LLM**: OpenAI GPT (자동 해석 생성)
 - **웹**: Flask, HTML/CSS/JavaScript
@@ -63,7 +63,7 @@
 
 ### 🤖 모델 아키텍처
 
-- **기본 모델**: Random Forest (n_estimators=200)
+- **기본 모델**: LightGBM
 - **데이터 분할**: 시계열 기반 훈련/검증/테스트
 - **불균형 처리**: SMOTE 기법 적용
 
